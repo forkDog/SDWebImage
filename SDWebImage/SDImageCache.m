@@ -144,18 +144,18 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 }
 
 - (instancetype)init {
-    return [self initWithNamespace:@"default"];
+    return [self initWithNamespace:@"TuiJi_Cache"];
 }
 
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns {
-    NSString *path = [self makeDiskCachePath:ns];
-    return [self initWithNamespace:ns diskCacheDirectory:path];
+    //NSString *path = [self makeDiskCachePath:ns];
+    return [self initWithNamespace:ns diskCacheDirectory:nil];
 }
 
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns
                        diskCacheDirectory:(nonnull NSString *)directory {
     if ((self = [super init])) {
-        NSString *fullNamespace = [@"com.hackemist.SDWebImageCache." stringByAppendingString:ns];
+        NSString *fullNamespace = ns;
         
         // Create IO serial queue
         _ioQueue = dispatch_queue_create("com.hackemist.SDWebImageCache", DISPATCH_QUEUE_SERIAL);
@@ -165,7 +165,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
         // Init the memory cache
         _memCache = [[SDMemoryCache alloc] init];
         _memCache.name = fullNamespace;
-
+        
         // Init the disk cache
         if (directory != nil) {
             _diskCachePath = [directory stringByAppendingPathComponent:fullNamespace];
@@ -173,25 +173,25 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
             NSString *path = [self makeDiskCachePath:ns];
             _diskCachePath = path;
         }
-
+        
         dispatch_sync(_ioQueue, ^{
             self.fileManager = [NSFileManager new];
         });
-
+        
 #if SD_UIKIT
         // Subscribe to app events
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(deleteOldFiles)
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(backgroundDeleteOldFiles)
                                                      name:UIApplicationDidEnterBackgroundNotification
                                                    object:nil];
 #endif
     }
-
+    
     return self;
 }
 
